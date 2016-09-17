@@ -15,6 +15,15 @@ var ShippingSchema = new Schema({
     type: String,
     enum: ['pending', 'sent', 'received', 'done']
   }
+}, {
+  toJSON: {
+    transform: function(doc, ret, options) {
+      delete ret._id;
+      delete ret.__v;
+
+      return ret;
+    }
+  }
 });
 
 module.exports = mongoose.model('Shipping', ShippingSchema);

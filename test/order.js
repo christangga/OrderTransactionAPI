@@ -2,7 +2,7 @@ var request = require('supertest');
 var should = require('should');
 var app = require('../app');
 
-var url = 'http://localhost:3000';
+var url = 'https://order-transaction-api.herokuapp.com';
 var product_id = '57dbaeaadcba0f0cb705101c';
 var coupon_code = 'DC10K';
 var proof_path = 'test\\4b7aa632d1fdf3c1872a7370a9f74bc2';
@@ -142,8 +142,6 @@ describe('Customer Endpoint', function() {
 
   describe('POST /order', function() {
     it('should not order', function(done) {
-      this.timeout(5000);
-
       request(url)
         .post('/order')
         .send({
@@ -190,8 +188,6 @@ describe('Customer Endpoint', function() {
     });
 
     it('should not order', function(done) {
-      this.timeout(5000);
-
       request(url)
         .post('/order')
         .send({
@@ -209,8 +205,6 @@ describe('Customer Endpoint', function() {
     });
 
     it('should not order', function(done) {
-      this.timeout(5000);
-
       request(url)
         .post('/order')
         .send({
@@ -228,8 +222,6 @@ describe('Customer Endpoint', function() {
     });
 
     it('should not order', function(done) {
-      this.timeout(5000);
-
       request(url)
         .post('/order')
         .send({
@@ -247,8 +239,6 @@ describe('Customer Endpoint', function() {
     });
 
     it('should not order', function(done) {
-      this.timeout(5000);
-
       request(url)
         .post('/order')
         .send({
@@ -266,8 +256,6 @@ describe('Customer Endpoint', function() {
     });
 
     it('should not order', function(done) {
-      this.timeout(5000);
-
       request(url)
         .post('/order')
         .expect(400)
@@ -456,8 +444,6 @@ describe('Customer Endpoint', function() {
     });
 
     it('should order', function(done) {
-      this.timeout(5000);
-
       var req = request(url).post('/order');
       req.cookies = cookies;
       req.send({
@@ -470,8 +456,10 @@ describe('Customer Endpoint', function() {
           if (err) {
             done(err);
           } else {
-            res.body.order_id.should.have.length(24);
-            order_id = res.body.order_id;
+            res.body._id.should.have.length(24);
+            res.body.items.should.have.length(1);
+            res.body.coupon.code.should.equal(coupon_code);
+            order_id = res.body._id;
 
             done();
           }

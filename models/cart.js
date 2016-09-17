@@ -9,7 +9,6 @@ var cartSchema = new Schema({
     unique: true
   },
   items: [{
-    _id: false,
     product: {
       type: ObjectId,
       ref: 'Product'

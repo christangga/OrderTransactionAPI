@@ -10,7 +10,6 @@ var Shipping = require('../models/shipping');
 var OrderController = function() {}
 
 OrderController.prototype.getCart = function(req, res) {
-  console.log('sid', req.session.id);
   Cart.findOne({
     sid: req.session.id
   }).populate('items.product coupon').exec(function(err, cart) {
@@ -93,14 +92,15 @@ OrderController.prototype.addCoupon = function(req, res) {
       Cart.findOrCreate({
         sid: req.session.id
       }, {
-        coupon: coupon,
+        sid: req.session.id,
+        coupon: coupon._id,
         valid_until: req.session.expires
       }, function(err, cart, created) {
         if (!cart) {
           res.status(400).json('Unknown error');
         } else {
           if (!created) {
-            cart.coupon = coupon;
+            cart.coupon = coupon._id;
             cart.save(function(err, updatedCart) { // err can be ignored
               res.status(200).end();
             });
@@ -145,7 +145,7 @@ OrderController.prototype.order = function(req, res) {
             async.series([
               function(cb) { // invalidate coupon
                 if (cart.coupon) {
-                  Coupon.invalidate(cart.coupon, function(err, coupon) {
+                  Coupon.invalidate(cart.coupon.code, function(err, coupon) {
                     cb(err, coupon);
                   });
                 } else {
@@ -165,7 +165,7 @@ OrderController.prototype.order = function(req, res) {
 
               shipping.save(function(err, updatedShipping) {
                 var order = new Order({
-                  items: cart.items,
+                  items: JSON.parse(JSON.stringify(cart.items)),
                   coupon: result[0],
                   shipping: updatedShipping._id,
                   status: 'pending',
@@ -177,9 +177,7 @@ OrderController.prototype.order = function(req, res) {
                     sid: req.session.id
                   }, function(err) {
                     req.session.destroy(function(err) {
-                      res.status(201).json({
-                        order_id: updatedOrder._id
-                      });
+                      res.status(201).json(updatedOrder);
                     });
                   });
                 });
@@ -213,13 +211,11 @@ OrderController.prototype.pay = function(req, res) {
 }
 
 OrderController.prototype.checkStatus = function(req, res) {
-  Order.findById(req.params.order_id, function(err, order) {
+  Order.findById(req.params.order_id).exec(function(err, order) {
     if (!order) {
       res.status(400).json('Invalid order');
     } else {
-      res.status(200).json({
-        status: order.status
-      });
+      res.status(200).json(order);
     }
   });
 }
@@ -231,9 +227,7 @@ OrderController.prototype.shippingStatus = function(req, res) {
     if (!shipping) {
       res.status(400).json('Invalid shipping');
     } else {
-      res.status(200).json({
-        status: shipping.status
-      });
+      res.status(200).json(shipping);
     }
   });
 }

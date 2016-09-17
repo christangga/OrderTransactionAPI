@@ -16,6 +16,14 @@ var orderSchema = new Schema({
     enum: ['pending', 'paid', 'verified', 'cancelled', 'shipped']
   },
   created_at: Date
+}, {
+  toJSON: {
+    transform: function(doc, ret, options) {
+      delete ret.__v;
+
+      return ret;
+    }
+  }
 });
 
 orderSchema.statics.validate = function(items, cb) {
