@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 var express = require('express');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
@@ -8,7 +10,10 @@ var MongoStore = require('connect-mongo')(session);
 var routes = require('./routes');
 
 // connect to database
-mongoose.connect('mongodb://root:root@ds023465.mlab.com:23465/order_transaction');
+mongoose.connect(process.env.DB_HOST, {
+  user: process.env.DB_USERNAME,
+  pass: process.env.DB_PASSWORD
+});
 
 var app = express();
 app.use(logger('dev'));

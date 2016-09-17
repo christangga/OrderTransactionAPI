@@ -5,7 +5,7 @@ var app = require('../app');
 var url = 'https://order-transaction-api.herokuapp.com';
 var product_id = '57dbaeaadcba0f0cb705101c';
 var coupon_code = 'DC10K';
-var proof_path = 'test\\4b7aa632d1fdf3c1872a7370a9f74bc2';
+var proof_path = 'test/4b7aa632d1fdf3c1872a7370a9f74bc2';
 var shipping_id = 'BDO-CGK';
 
 var cookies;
