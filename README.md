@@ -100,8 +100,8 @@ For now, login system for admin has not been implemented yet. Authentication sys
    Example Request Data:
    ```
    {
-       "scenario": "verify",
-       "order_id": "57dcc0cff2539b1874e085a9"
+        "scenario": "verify",
+        "order_id": "57dcc0cff2539b1874e085a9"
    }
    ```
 
@@ -110,8 +110,8 @@ For now, login system for admin has not been implemented yet. Authentication sys
    Example Request Data:
    ```
    {
-       "order_id": "57dcc0cff2539b1874e085a9",
-       "shipping_id": "1234567890"
+        "order_id": "57dcc0cff2539b1874e085a9",
+        "shipping_id": "1234567890"
    }
    ```
 
