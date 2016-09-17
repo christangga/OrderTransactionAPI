@@ -28,25 +28,25 @@ npm start
 Available `product_id` for now: 
   - 57dbaeaadcba0f0cb705101c
   - 57dd542df36d281f21d619ad
-Example Request Data:
-```
-{
-	"product_id": "57dd542df36d281f21d619ad",
-	"product_quantity": 10
-}
-```
+  Example Request Data:
+  ```
+  {
+    "product_id": "57dd542df36d281f21d619ad",
+    "product_quantity": 10
+  }
+  ```
 
 3. `GET /cart/coupon` - Add coupon to cart. Coupon is replaced if exist in the cart.
-Available `coupon_code` for now:
+  Available `coupon_code` for now:
   - DC10K
   - DC20K
   - DC10P
-Example Request Data:
-```
-{
-	"coupon_code": "DC10K"
-}
-```
+  Example Request Data:
+  ```
+  {
+  	"coupon_code": "DC10K"
+  }
+  ```
 
 4. `POST /order` - Order products. Customer must fill name, email, address, and phone number. Customer must save `order_id` given by the response.
 Example Request Data:
