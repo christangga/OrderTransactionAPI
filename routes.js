@@ -17,7 +17,7 @@ router.post('/order/pay', upload.single('proof'), OrderController.pay);
 router.get('/order/:order_id', OrderController.checkStatus);
 router.get('/shipping/:shipping_id', OrderController.shippingStatus);
 
-router.post('/admin/auth', AdminController.auth);
+// router.post('/admin/auth', AdminController.auth);
 router.get('/admin/order', AdminController.getOrder);
 router.get('/admin/order/:order_id', AdminController.getOrderDetail);
 router.post('/admin/order/update', AdminController.updateOrder);

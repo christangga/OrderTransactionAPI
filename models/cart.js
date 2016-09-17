@@ -16,7 +16,10 @@ var cartSchema = new Schema({
     },
     quantity: Number
   }],
-  coupon: String,
+  coupon: {
+    type: ObjectId,
+    ref: 'Coupon'
+  },
   valid_until: Date
 }, {
   toJSON: {

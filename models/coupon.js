@@ -20,6 +20,16 @@ var couponSchema = new Schema({
     enum: ['percentage', 'nominal']
   },
   amount: Number
+}, {
+  toJSON: {
+    transform: function(doc, ret, options) {
+      delete ret.valid_from;
+      delete ret.valid_until;
+      delete ret.quantity;
+
+      return ret;
+    }
+  }
 });
 
 couponSchema.statics.validate = function(code, cb) {
@@ -29,7 +39,7 @@ couponSchema.statics.validate = function(code, cb) {
     if (!coupon || coupon.valid_from > new Date() || coupon.valid_until < new Date() || coupon.quantity == 0) {
       cb('Invalid coupon');
     } else {
-      cb(null);
+      cb(null, coupon);
     }
   });
 }

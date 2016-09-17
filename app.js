@@ -1,6 +1,5 @@
 var express = require('express');
 var logger = require('morgan');
-var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var session = require('express-session');
@@ -17,7 +16,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
-app.use(cookieParser());
 
 // create session store
 app.use(session({

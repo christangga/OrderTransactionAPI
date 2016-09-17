@@ -13,7 +13,7 @@ OrderController.prototype.getCart = function(req, res) {
   console.log('sid', req.session.id);
   Cart.findOne({
     sid: req.session.id
-  }, function(err, cart) {
+  }).populate('items.product coupon').exec(function(err, cart) {
     if (!cart) {
       res.status(204).end();
     } else {
@@ -24,45 +24,60 @@ OrderController.prototype.getCart = function(req, res) {
   });
 }
 
+// check if cart qty > database qty
+// check if 
 OrderController.prototype.addToCart = function(req, res) {
   Product.findById(req.body.product_id, function(err, product) {
-    if (product.quantity < req.body.product_quantity) {
+    if (!product || !req.body.product_quantity) {
+      res.status(400).json('Invalid product');
+    } else if (product.quantity < req.body.product_quantity) {
       res.status(400).json('Insufficient product quantity');
     } else {
-      Cart.findOrCreate({
+      Cart.findOne({
         sid: req.session.id
-      }, {
-        sid: req.session.id,
-        items: [{
-          product: req.body.product_id,
-          quantity: req.body.product_quantity
-        }],
-        valid_until: req.session.expires
-      }, function(err, cart, created) {
-        if (!cart) {
-          res.status(400).json('Unknown error');
-        } else {
-          if (!created) {
-            var isFound = false;
-            cart.items.forEach(function(item) {
-              if (item.product == req.body.product_id) {
-                isFound = true;
-                item.quantity += req.body.product_quantity;
-              }
+      }, function(err, cart) {
+        if (!cart) { // create new cart
+          if (req.body.product_quantity < 0) {
+            res.status(400).json('Invalid product quantity');
+          } else {
+            var cart = new Cart({
+              sid: req.session.id,
+              items: [{
+                product: req.body.product_id,
+                quantity: req.body.product_quantity
+              }],
+              valid_until: req.session.expires
             });
 
-            if (!isFound) {
+            cart.save(function(err) {
+              res.status(201).end();
+            });
+          }
+        } else { // update cart
+          var itemIndex = -1;
+          cart.items.forEach(function(item, i) {
+            if (item.product == req.body.product_id) {
+              itemIndex = i;
+            }
+          });
+
+          if (itemIndex < 0 && req.body.product_quantity <= 0) {
+            res.status(400).json('Invalid product quantity');
+          } else {
+            if (itemIndex < 0 && req.body.product_quantity > 0) {
               cart.items.push({
                 product: req.body.product_id,
                 quantity: req.body.product_quantity
               });
+            } else if (itemIndex >= 0 && cart.items[itemIndex].quantity + req.body.product_quantity <= 0) {
+              cart.items.splice(itemIndex, 1);
+            } else {
+              cart.items[itemIndex].quantity += req.body.product_quantity;
             }
 
             cart.save(function(err, updatedCart) { // err can be ignored
               res.status(200).end();
             });
-          } else {
-            res.status(201).end();
           }
         }
       });
@@ -71,21 +86,21 @@ OrderController.prototype.addToCart = function(req, res) {
 }
 
 OrderController.prototype.addCoupon = function(req, res) {
-  Coupon.validate(req.body.coupon_code, function(err) {
+  Coupon.validate(req.body.coupon_code, function(err, coupon) {
     if (err) {
       res.status(400).json(err);
     } else {
       Cart.findOrCreate({
         sid: req.session.id
       }, {
-        coupon: req.body.coupon_code,
+        coupon: coupon,
         valid_until: req.session.expires
       }, function(err, cart, created) {
         if (!cart) {
           res.status(400).json('Unknown error');
         } else {
           if (!created) {
-            cart.coupon = req.body.coupon_code;
+            cart.coupon = coupon;
             cart.save(function(err, updatedCart) { // err can be ignored
               res.status(200).end();
             });
@@ -99,78 +114,82 @@ OrderController.prototype.addCoupon = function(req, res) {
 }
 
 OrderController.prototype.order = function(req, res) {
-  Cart.findOne({
-    sid: req.session.id
-  }).populate('items.product').exec(function(err, cart) {
-    if (!cart) {
-      res.status(400).json('Invalid cart');
-    } else {
-      async.series([
-        function(cb) { // validate coupon
-          if (cart.coupon) {
-            Coupon.validate(cart.coupon, function(err) {
-              cb(err);
-            });
-          } else {
-            cb(null);
-          }
-        },
-        function(cb) { // validate order
-          Order.validate(cart.items, function(err) {
-            cb(err);
-          });
-        }
-      ], function(err) {
-        if (err) {
-          res.status(400).json(err);
-        } else {
-          async.series([
-            function(cb) { // invalidate coupon
-              if (cart.coupon) {
-                Coupon.invalidate(cart.coupon, function(err, coupon) {
-                  cb(err, coupon);
-                });
-              } else {
-                cb(null);
-              }
-            },
-            function(cb) { // invalidate order
-              Order.invalidate(cart.items, function(err) {
+  if (!req.body.name || !req.body.email || !req.body.address || !req.body.phone) {
+    res.status(400).json('Invalid contact');
+  } else {
+    Cart.findOne({
+      sid: req.session.id
+    }).populate('items.product coupon').exec(function(err, cart) {
+      if (!cart || !cart.items.length) {
+        res.status(400).json('Invalid cart');
+      } else {
+        async.series([
+          function(cb) { // validate coupon
+            if (cart.coupon) {
+              Coupon.validate(cart.coupon.code, function(err) {
                 cb(err);
               });
+            } else {
+              cb(null);
             }
-          ], function(err, result) {
-            var shipping = new Shipping({
-              contact: req.body,
-              status: 'pending'
+          },
+          function(cb) { // validate order
+            Order.validate(cart.items, function(err) {
+              cb(err);
             });
-
-            shipping.save(function(err, updatedShipping) {
-              var order = new Order({
-                items: cart.items,
-                coupon: result[0],
-                shipping: updatedShipping._id,
-                status: 'pending',
-                created_at: new Date()
+          }
+        ], function(err) {
+          if (err) {
+            res.status(400).json(err);
+          } else {
+            async.series([
+              function(cb) { // invalidate coupon
+                if (cart.coupon) {
+                  Coupon.invalidate(cart.coupon, function(err, coupon) {
+                    cb(err, coupon);
+                  });
+                } else {
+                  cb(null);
+                }
+              },
+              function(cb) { // invalidate order
+                Order.invalidate(cart.items, function(err) {
+                  cb(err);
+                });
+              }
+            ], function(err, result) {
+              var shipping = new Shipping({
+                contact: req.body,
+                status: 'pending'
               });
 
-              order.save(function(err, updatedOrder) {
-                Cart.remove({
-                  sid: req.session.id
-                }, function(err) {
-                  req.session.destroy(function(err) {
-                    res.status(201).json({
-                      order_id: updatedOrder._id
+              shipping.save(function(err, updatedShipping) {
+                var order = new Order({
+                  items: cart.items,
+                  coupon: result[0],
+                  shipping: updatedShipping._id,
+                  status: 'pending',
+                  created_at: new Date()
+                });
+
+                order.save(function(err, updatedOrder) {
+                  Cart.remove({
+                    sid: req.session.id
+                  }, function(err) {
+                    req.session.destroy(function(err) {
+                      res.status(201).json({
+                        order_id: updatedOrder._id
+                      });
                     });
                   });
                 });
               });
             });
-          });
-        }
-      });
-    }
-  });
+          }
+        });
+      }
+    });
+  }
 }
 
 OrderController.prototype.pay = function(req, res) {

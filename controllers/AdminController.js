@@ -2,14 +2,13 @@ var Order = require('../models/order');
 
 var AdminController = function() {}
 
-AdminController.prototype.auth = function(req, res) {
-
-}
-
 AdminController.prototype.getOrder = function(req, res) {
-  Order.find({
-    status: req.query.status
-  }, function(err, orders) {
+  var options = {};
+  if (req.query.status) {
+    options.status = req.query.status;
+  }
+
+  Order.find(options, function(err, orders) {
     if (!orders.length) {
       res.status(204).end();
     } else {
@@ -32,7 +31,7 @@ AdminController.prototype.getOrderDetail = function(req, res) {
 
 AdminController.prototype.updateOrder = function(req, res) {
   Order.findById(req.body.order_id, function(err, order) {
-    if (!order || order.status != 'paid' || ['verify', 'cancel'].indexOf(req.body.scenario) < 0) {
+    if (!order || ['pending', 'paid'].indexOf(order.status) < 0 || ['verify', 'cancel'].indexOf(req.body.scenario) < 0) {
       res.status(400).json('Invalid order');
     } else {
       if (req.body.scenario == 'verify') {
