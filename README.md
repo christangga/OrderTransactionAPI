@@ -34,8 +34,8 @@
    Example Request Data:
    ```
    {
-     "product_id": "57dd542df36d281f21d619ad",
-     "product_quantity": 10
+        "product_id": "57dd542df36d281f21d619ad",
+        "product_quantity": 10
    }
    ```
 
@@ -49,7 +49,7 @@
    Example Request Data:
    ```
    {
-     "coupon_code": "DC10K"
+        "coupon_code": "DC10K"
    }
    ```
 
@@ -58,10 +58,10 @@
    Example Request Data:
    ```
    {
-     "name": "Christ",
-     "email": "ca@gmail.com",
-     "phone": "08123456789",
-     "address": "Bandung"
+        "name": "Christ",
+        "email": "ca@gmail.com",
+        "phone": "08123456789",
+        "address": "Bandung"
    }
    ```
 
@@ -100,8 +100,8 @@ For now, login system for admin has not been implemented yet. Authentication sys
    Example Request Data:
    ```
    {
-    "scenario": "verify",
-    "order_id": "57dcc0cff2539b1874e085a9"
+       "scenario": "verify",
+       "order_id": "57dcc0cff2539b1874e085a9"
    }
    ```
 
@@ -110,13 +110,13 @@ For now, login system for admin has not been implemented yet. Authentication sys
    Example Request Data:
    ```
    {
-     "order_id": "57dcc0cff2539b1874e085a9",
-     "shipping_id": "1234567890"
+       "order_id": "57dcc0cff2539b1874e085a9",
+       "shipping_id": "1234567890"
    }
    ```
 
 ## Testing
 For now, there are 50+ unit tests has been implemented. To test, issue this command:
-   ```
-   npm test
-   ```
+```
+npm test
+```
