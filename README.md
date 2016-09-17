@@ -26,9 +26,8 @@ npm start
 
 2. `POST /cart` - Add product to cart. Product quantity can be negative. If product exist in cart, quantity is summed.
 Available `product_id` for now: 
-- 57dbaeaadcba0f0cb705101c
-- 57dd542df36d281f21d619ad
-
+  - 57dbaeaadcba0f0cb705101c
+  - 57dd542df36d281f21d619ad
 Example Request Data:
 ```
 {
@@ -39,10 +38,9 @@ Example Request Data:
 
 3. `GET /cart/coupon` - Add coupon to cart. Coupon is replaced if exist in the cart.
 Available `coupon_code` for now:
-- DC10K
-- DC20K
-- DC10P
-
+  - DC10K
+  - DC20K
+  - DC10P
 Example Request Data:
 ```
 {
@@ -51,7 +49,6 @@ Example Request Data:
 ```
 
 4. `POST /order` - Order products. Customer must fill name, email, address, and phone number. Customer must save `order_id` given by the response.
-
 Example Request Data:
 ```
 {
@@ -63,7 +60,6 @@ Example Request Data:
 ```
 
 5. `POST /order/pay` - Pay order. Customer must attach payment proof to be verified later by admin. Order status automatically changed into `paid`.
-
 Example Request Data:
 ```
 proof=path/to/file
@@ -80,18 +76,18 @@ For now, login system for admin has not been implemented yet. Authentication sys
 1. `GET /admin/order` - Retrieve all customers' orders.
 Can be filtered using `status`.
 Available status:
-- pending - order has been created but not yet paid by customers
-- paid - order has been paid and waiting to be verified.
-- verified - order has been verified by admin and ready to be shipped.
-- cancelled - order has been cancelled by admin.
-- shipped - order has been shipped by admin.
+  - pending - order has been created but not yet paid by customers
+  - paid - order has been paid and waiting to be verified.
+  - verified - order has been verified by admin and ready to be shipped.
+  - cancelled - order has been cancelled by admin.
+  - shipped - order has been shipped by admin.
 
 2. `GET /admin/order/:order_id` - Get order detail.
 
 3. `POST /admin/order/update` - Update order from `pending`/`paid` to `verified`/`cancelled`.
 Available scenario:
-- verify - verify order
-- cancel - cancel order
+  - verify - verify order
+  - cancel - cancel order
 
 Example Request Data:
 ```
